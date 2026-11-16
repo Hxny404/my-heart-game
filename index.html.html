@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لعبة لأسماء</title>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--pink1:#FFD3E2;--pink2:#FFA9C6;--red:#C41E3A;--wine:#5B1230;--panel:rgba(255,240,246,.88);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{height:100%}
+body{margin:0;min-height:100%;background:linear-gradient(160deg,var(--pink1),var(--pink2));background-attachment:fixed;color:var(--wine);
+  font-family:"Tajawal",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;text-align:center;overflow-x:hidden}
+#bows{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bow{position:absolute;color:var(--red);animation:sway 5s ease-in-out infinite alternate}
+.bow.w{color:#fff}
+@keyframes sway{to{transform:translateY(8px) rotate(var(--r2))}}
+main{position:relative;z-index:2;width:100%;max-width:460px;background:var(--panel);border-radius:26px;padding:26px 20px;box-shadow:0 10px 40px rgba(150,20,60,.18)}
+h1{font-family:"Aref Ruqaa","Tajawal",serif;font-weight:700;font-size:clamp(2rem,8.5vw,3.1rem);margin:0 0 10px;line-height:1.4;color:var(--red)}
+.sub{margin:0 0 24px;font-size:1.08rem;line-height:1.9}
+.btn{font:inherit;font-size:1.1rem;font-weight:500;cursor:pointer;border:0;border-radius:999px;padding:13px 32px;background:var(--red);color:#fff}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--wine);outline-offset:3px}
+.hide{display:none!important}
+.bar{display:flex;gap:6px;justify-content:center;margin-bottom:16px;font-size:20px}
+.bar span{opacity:.3;filter:grayscale(1);transition:.3s}
+.bar span.on{opacity:1;filter:none;transform:scale(1.15)}
+.q{background:#fff;color:var(--wine);border-radius:18px;padding:22px 18px;font-family:"Aref Ruqaa","Tajawal",serif;font-size:clamp(1.25rem,4.8vw,1.6rem);line-height:1.9;margin-bottom:14px;box-shadow:0 2px 0 rgba(196,30,58,.15)}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;font-size:1.05rem;cursor:pointer;border:2px solid var(--red);border-radius:14px;padding:13px 14px;background:rgba(255,255,255,.75);color:var(--wine);min-height:52px;transition:.2s}
+.opt:hover{background:#fff}
+.opt.picked{background:var(--red);color:#fff}
+.opt[disabled]{cursor:default}
+.react{min-height:3.4em;margin:16px 0 10px;color:var(--red);font-size:1.15rem;font-weight:500;line-height:1.8}
+.heart{font-size:64px;margin-bottom:6px;animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.12)}}
+.sign{direction:ltr;margin-top:20px;font-family:"Aref Ruqaa",serif;font-size:1.5rem;color:var(--red)}
+.petal{position:fixed;top:-30px;pointer-events:none;font-size:22px;animation:fall linear forwards;z-index:5}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.2}}
+@media (prefers-reduced-motion:reduce){.petal{display:none}.heart,.bow{animation:none}.bar span,.opt{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="bow" viewBox="0 0 100 64">
+    <g fill="currentColor" stroke="rgba(120,20,50,.45)" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M50 30C30 4 4 8 8 30c3 22 30 20 42 0z"/>
+      <path d="M50 30C70 4 96 8 92 30c-3 22-30 20-42 0z"/>
+      <path d="M46 36L32 62l15-7 4-17zM54 36l14 26-15-7-4-17z"/>
+      <ellipse cx="50" cy="30" rx="8" ry="9"/>
+    </g>
+  </symbol>
+</svg>
+<div id="bows" aria-hidden="true"></div>
+
+<main>
+  <section id="start">
+    <h1>لعبة صغيرة من قلبي ليكي يا أسماء</h1>
+    <p class="sub">ست أسئلة بس عن حبي ليكي،<br>ومفيش إجابة غلط 😉</p>
+    <button class="btn" id="go">يلا نبدأ</button>
+  </section>
+
+  <section id="play" class="hide" aria-live="polite">
+    <div class="bar" id="bar"></div>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div class="react" id="react"></div>
+    <button class="btn hide" id="next">السؤال اللي بعده</button>
+  </section>
+
+  <section id="end" class="hide">
+    <div class="heart">❤️</div>
+    <h1>كل الإجابات صح</h1>
+    <p class="sub">لأنك إنتِ الصح في حياتي يا حبيبتي.<br>بحبك جامد جداً جداً جداً،<br>وهفضل أحبك العمر كله.</p>
+    <button class="btn" id="again">العبي تاني</button>
+    <div class="sign">eng/hany hamed 🤍</div>
+  </section>
+</main>
+
+<script>
+/* عدّل الأسئلة هنا: لكل اختيار نص (t) ورد (r) */
+const QUESTIONS = [
+  { q: "تفتكري أنا بفكر فيكي كام مرة في اليوم؟", o: [
+    { t: "مرة واحدة", r: "مرة؟! 😂 دي أقل من ثانية، أنا بفكر فيكي طول اليوم." },
+    { t: "عشر مرات", r: "عشرة؟ لا يا قلبي، أنا مش بعدّ أصلاً." },
+    { t: "كل ساعة", r: "كل ساعة؟ لا، كل دقيقة وكل لحظة." },
+    { t: "طول الوقت", r: "صح عليكي! من يوم ما عرفتك وأنا مبطّلتش أفكر فيكي." } ] },
+  { q: "لو الدنيا كلها اتعرضت عليا ومعاها إنتِ، أختار مين؟", o: [
+    { t: "الدنيا", r: "😂 لا لا، أنا مش بهزر، إنتِ أكبر من الدنيا عندي." },
+    { t: "إنتِ طبعاً", r: "من غير ما أفكر ثانية، إنتِ دنيتي." },
+    { t: "الاتنين", r: "هاخدك إنتِ بس، لأن إنتِ الدنيا كلها." },
+    { t: "إنتِ وبس", r: "وبس وبس وبس، من غير أي حاجة تانية." } ] },
+  { q: "أنا بحبك قد إيه؟", o: [
+    { t: "كتير", r: "كتير؟ ده مش كفاية، أنا بحبك جامد جداً جداً جداً." },
+    { t: "قد السما", r: "السما؟ لا يا حبيبتي، حبي ليكي أكبر منها بكتير." },
+    { t: "قد الدنيا كلها", r: "والدنيا كلها صغيرة قدام حبي ليكي." },
+    { t: "مفيش مقياس يكفي", r: "بالظبط، حبي ليكي ملوش آخر." } ] },
+  { q: "إيه أحلى حاجة فيكي في عيني؟", o: [
+    { t: "ضحكتك", r: "ضحكتك بتنسّيني أي تعب، وبتخليني أحبك أكتر كل يوم." },
+    { t: "عينيكي", r: "بغرق فيهم وأنا مبسوط، ومش عايز أطلع." },
+    { t: "قلبك", r: "قلبك أحلى حاجة، ومعاه حبيت كل حاجة فيكي." },
+    { t: "كل حاجة", r: "كل حاجة! حتى زعلك بيبقى حلو في عيني." } ] },
+  { q: "لو الأيام رجعت بيا، كنت أختارك تاني؟", o: [
+    { t: "أكيد", r: "ألف مرة، ومليون كمان." },
+    { t: "مش عارفة", r: "أنا عارف، وهختارك في كل مرة من غير تفكير." },
+    { t: "لا", r: "😅 لا لا، أنا لو رجعت هدوّر عليكي الأول!" },
+    { t: "كل مرة", r: "كل مرة وفي كل حياة، يا أحلى حاجة حصلتلي." } ] },
+  { q: "آخر سؤال: تقبلي تفضلي معايا العمر كله؟", o: [
+    { t: "طبعاً", r: "أنا دلوقتي مش مصدق نفسي من الفرحة." },
+    { t: "أكيد", r: "كده خلصت اللعبة وكسبنا إحنا الاتنين." },
+    { t: "ولا محتاج سؤال", r: "عندك حق، السؤال كان للتأكيد بس." },
+    { t: "من زمان", r: "وأنا كمان من زمان، وهفضل كده." } ] }
+];
+
+const $ = id => document.getElementById(id);
+let n = 0;
+
+/* فيونكات حمرا وبيضا في الخلفية */
+(function(){
+  const box = $("bows"), cols = 5, rows = 8;
+  for(let r = 0; r < rows; r++){
+    for(let c = 0; c < cols; c++){
+      const size = 36 + Math.random()*36;
+      const el = document.createElementNS("http://www.w3.org/2000/svg","svg");
+      el.setAttribute("viewBox","0 0 100 64");
+      el.setAttribute("class","bow" + ((r + c) % 2 ? " w" : ""));
+      el.setAttribute("width", size);
+      el.setAttribute("height", size*0.64);
+      const rot = -35 + Math.random()*70;
+      el.style.left = ((c + 0.15 + Math.random()*0.7) * 100/cols) + "%";
+      el.style.top = ((r + 0.15 + Math.random()*0.7) * 100/rows) + "%";
+      el.style.transform = "rotate(" + rot + "deg)";
+      el.style.setProperty("--r2", (rot + 8) + "deg");
+      el.style.animationDelay = (-Math.random()*5) + "s";
+      el.innerHTML = '<use href="#bow"/>';
+      box.appendChild(el);
+    }
+  }
+})();
+
+function petals(){
+  const set = ["🎀","❤️","🌸","🤍","✨"];
+  for(let k = 0; k < 28; k++){
+    const p = document.createElement("span");
+    p.className = "petal";
+    p.textContent = set[k % set.length];
+    p.style.left = Math.random()*100 + "vw";
+    p.style.animationDuration = (3 + Math.random()*3) + "s";
+    p.style.animationDelay = (Math.random()*0.8) + "s";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 7500);
+  }
+}
+
+function render(){
+  const item = QUESTIONS[n];
+  $("bar").innerHTML = QUESTIONS.map((_, k) => "<span class='" + (k <= n ? "on" : "") + "'>❤️</span>").join("");
+  $("q").textContent = item.q;
+  $("react").textContent = "";
+  $("next").classList.add("hide");
+  $("opts").innerHTML = "";
+  item.o.forEach(opt => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = opt.t;
+    b.addEventListener("click", () => {
+      [...$("opts").children].forEach(x => x.disabled = true);
+      b.classList.add("picked");
+      $("react").textContent = opt.r;
+      $("next").textContent = n === QUESTIONS.length - 1 ? "شوفي النتيجة" : "السؤال اللي بعده";
+      $("next").classList.remove("hide");
+    });
+    $("opts").appendChild(b);
+  });
+}
+
+$("go").addEventListener("click", () => {
+  n = 0;
+  $("start").classList.add("hide");
+  $("play").classList.remove("hide");
+  render();
+});
+$("next").addEventListener("click", () => {
+  if(n === QUESTIONS.length - 1){
+    $("play").classList.add("hide");
+    $("end").classList.remove("hide");
+    petals();
+  } else { n++; render(); }
+});
+$("again").addEventListener("click", () => {
+  $("end").classList.add("hide");
+  $("start").classList.remove("hide");
+});
+</script>
+</body>
+</html>
